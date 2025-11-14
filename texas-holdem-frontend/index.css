@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    background-color: #111827; /* Darker bg */
+    font-family: 'Inter', sans-serif;
+    color: #f3f4f6;
+}
+
+/* Base style for pill-shaped buttons */
+.pill-btn {
+    @apply px-8 py-3 font-bold rounded-full shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+}
+
+.btn-fold {
+    @apply bg-gray-700 hover:bg-gray-800 text-gray-300 border-2 border-gray-900;
+}
+
+.btn-check {
+    @apply bg-transparent hover:bg-gray-700 text-white border-2 border-gray-500;
+}
+
+.btn-call {
+    @apply bg-blue-700 hover:bg-blue-800 text-white border-2 border-blue-900 hover:shadow-blue-500/50;
+}
+
+.btn-raise {
+     @apply bg-green-600 hover:bg-green-700 text-white border-2 border-green-800 hover:shadow-green-500/50;
+}
+
+
+/* App title style to match the golden text in the image */
+.app-title {
+    color: #f59e0b; /* Amber 500 */
+    text-shadow: 0 2px 10px rgba(245, 158, 11, 0.4);
+    letter-spacing: 0.025em;
+    font-weight: 800;
+}
