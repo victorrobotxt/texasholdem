@@ -1,0 +1,24 @@
+# Python virtual environment
+.venv/
+venv/
+__pycache__/
+
+# Helper scripts and generated files at root level
+/copyDir.py
+/forge_git_history.sh
+/output.txt
+/stripped.json
+/metadata.json
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Frontend build/dependency folders
+node_modules/
+dist/
+
+# Secret files - never commit these
+texas-holdem-backend/.env
+texas-holdem-frontend/.env.local
