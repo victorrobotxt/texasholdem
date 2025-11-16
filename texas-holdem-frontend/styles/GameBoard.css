@@ -1,0 +1,101 @@
+.game-board {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    aspect-ratio: 16 / 9;
+}
+
+.table-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+}
+
+.poker-table {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px; /* Make it an oval */
+    background-color: #052e16; /* Darker green */
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.6), 0 10px 30px rgba(0,0,0,0.5);
+    border: 18px solid #422006; /* Wooden border */
+    border-top-width: 22px;
+    border-bottom-width: 22px;
+}
+
+.table-surface {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    border-radius: 9999px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+}
+
+.card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+    border: 1px solid #e5e7eb;
+}
+
+.card-small {
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+}
+
+/* General player position container */
+.player-position {
+    position: absolute;
+    width: 120px; /* Width of the player pod area */
+}
+
+/* Positions for 4 players */
+.player-pos-0-4 { /* Bottom (Human) */
+    bottom: -12%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.player-pos-1-4 { /* Left */
+    top: 50%;
+    left: -8%;
+    transform: translateY(-50%);
+}
+.player-pos-2-4 { /* Top */
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.player-pos-3-4 { /* Right */
+    top: 50%;
+    right: -8%;
+    transform: translateY(-50%);
+}
+
+.player-pod {
+    background-color: rgba(17, 24, 39, 0.7);
+    border-radius: 12px;
+    padding: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+}
+
+.active-ring {
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.9), 0 0 25px rgba(245, 158, 11, 0.7);
+    animation: pulse-glow 2s infinite alternate;
+}
+
+@keyframes pulse-glow {
+    from {
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.9), 0 0 25px rgba(245, 158, 11, 0.7);
+    }
+    to {
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.7), 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+}
