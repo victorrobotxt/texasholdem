@@ -22,3 +22,6 @@ dist/
 # Secret files - never commit these
 texas-holdem-backend/.env
 texas-holdem-frontend/.env.local
+res.txt
+texas-holdem-backend/res.txt
+.env
