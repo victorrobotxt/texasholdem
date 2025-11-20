@@ -39,8 +39,13 @@ export const ActionControls: React.FC<ActionControlsProps> = ({ player, pot, onA
     const handleFold = () => handleActionWithVibration(() => onAction('fold'));
     const handleCheckOrCall = () => handleActionWithVibration(() => onAction(canCheck ? 'check' : 'call'));
     const handleBetOrRaise = () => {
+        // Use the sanitized amount (minRaise <= amount <= stack)
         const finalAmount = Math.max(minRaise, Math.min(betAmount, player.chips + player.currentBet));
-        handleActionWithVibration(() => onAction(currentBet > 0 && callAmount < player.chips ? 'raise' : 'bet', finalAmount));
+        
+        // Determine action: raise if calling is required AND player has chips remaining, otherwise bet.
+        const actionType = (currentBet > 0 && callAmount < player.chips) ? 'raise' : 'bet';
+        
+        handleActionWithVibration(() => onAction(actionType, finalAmount));
     };
   
     const sanitizedBetAmount = Math.min(betAmount, player.chips + player.currentBet);
@@ -64,21 +69,47 @@ export const ActionControls: React.FC<ActionControlsProps> = ({ player, pot, onA
                 </AnimatePresence>
             </div>
     
-            <div className="flex flex-wrap items-stretch justify-center gap-4 w-full p-2">
-                <button onClick={handleFold} className="pill-btn btn-fold flex-grow sm:flex-grow-0">Fold</button>
-                <button onClick={handleCheckOrCall} className={`pill-btn flex-grow sm:flex-grow-0 ${canCheck ? 'btn-check' : 'btn-call'}`}>
+            <div className="flex flex-wrap items-stretch justify-center gap-3 w-full p-2">
+                
+                {/* 1. FOLD BUTTON */}
+                <button onClick={handleFold} 
+                    className="flex-grow sm:flex-grow-0 px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-sm transition-all active:scale-95 shadow-lg
+                    bg-gradient-to-b from-gray-700 to-gray-900 text-red-500 border-t border-gray-600 border-b-4 border-black hover:brightness-110">
+                    Fold
+                </button>
+                
+                {/* 2. CHECK / CALL BUTTON */}
+                <button onClick={handleCheckOrCall} 
+                    className={`flex-grow sm:flex-grow-0 px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-sm transition-all active:scale-95 shadow-lg text-white border-t border-blue-400 border-b-4 border-blue-900 hover:brightness-110
+                    ${canCheck 
+                        ? 'bg-gradient-to-b from-blue-500 to-blue-700' 
+                        : 'bg-gradient-to-b from-blue-600 to-blue-800'}`}>
                     {canCheck ? 'Check' : `Call $${callAmount}`}
                 </button>
-                <button onClick={handleBetOrRaise} disabled={sanitizedBetAmount < minRaise} className="pill-btn btn-raise flex-grow sm:flex-grow-0">
-                    {currentBet > 0 ? `Raise to $${sanitizedBetAmount}` : `Bet $${sanitizedBetAmount}`}
+                
+                {/* 3. BET / RAISE BUTTON */}
+                <button onClick={handleBetOrRaise} disabled={sanitizedBetAmount < minRaise} 
+                    className="flex-grow sm:flex-grow-0 px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-sm transition-all active:scale-95 shadow-lg
+                    bg-gradient-to-b from-amber-400 to-amber-600 text-black border-t border-amber-300 border-b-4 border-amber-800 hover:brightness-110 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed">
+                    {currentBet > 0 ? `Raise $${sanitizedBetAmount}` : `Bet $${sanitizedBetAmount}`}
                 </button>
             </div>
     
             <div className="w-full flex flex-col items-center space-y-2 pt-1">
-                <input type="range" min={minRaise} max={player.chips + player.currentBet} step="10" value={betAmount} onChange={handleBetChange} className="w-full max-w-md accent-yellow-500 disabled:cursor-not-allowed" />
+                <input type="range" 
+                    min={minRaise} 
+                    max={player.chips + player.currentBet} 
+                    step="10" 
+                    value={betAmount} 
+                    onChange={handleBetChange} 
+                    className="w-full max-w-md accent-yellow-500 disabled:cursor-not-allowed" />
+                
                 <div className="flex items-center justify-center space-x-3">
                     {quickBets.map(({label, value}) => (
-                        <button key={label} onClick={() => setBetAmount(value)} className="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-full shadow-md transition-all hover:scale-105 border border-amber-900 disabled:cursor-not-allowed disabled:hover:scale-100">{label}</button>
+                        <button key={label} onClick={() => setBetAmount(value)} 
+                            className="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-full shadow-md transition-all hover:scale-105 border border-amber-900 disabled:cursor-not-allowed disabled:hover:scale-100">
+                            {label}
+                        </button>
                     ))}
                 </div>
             </div>

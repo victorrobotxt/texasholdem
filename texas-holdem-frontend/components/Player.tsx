@@ -13,49 +13,47 @@ interface PlayerProps {
   showCards: boolean;
 }
 
-const avatarColors = [
-  'bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-purple-500'
-];
-
 export const Player: React.FC<PlayerProps> = ({ player, isActive, isDealer, isSmallBlind, isBigBlind, showCards }) => {
   const getBetPositionClass = () => {
-      if(player.isHuman) return 'bottom-[150%] left-1/2 -translate-x-1/2';
-      if(player.id === 2) return 'top-[150%] left-1/2 -translate-x-1/2';
-      if(player.id === 1) return 'top-1/2 -translate-y-1/2 left-[105%]';
-      if(player.id === 3) return 'top-1/2 -translate-y-1/2 right-[105%]';
+      // Adjusted slightly to match new 140px width
+      if(player.isHuman) return 'bottom-[120%] left-1/2 -translate-x-1/2';
+      if(player.id === 2) return 'top-[120%] left-1/2 -translate-x-1/2';
+      if(player.id === 1) return 'top-1/2 -translate-y-1/2 left-[100%]';
+      if(player.id === 3) return 'top-1/2 -translate-y-1/2 right-[100%]';
       return 'bottom-full';
   }
 
   const getStackPositionClass = () => {
-    if (player.isHuman) return 'top-1/2 -translate-y-1/2 left-[-80%] top-[-50%]';
-    if (player.id === 2) return 'left-1/2 -translate-x-1/2 left-[110%] bottom-[10%]';
+    // Adjusted slightly
+    if (player.isHuman) return 'top-1/2 -translate-y-1/2 left-[-60%] top-[-50%]';
+    if (player.id === 2) return 'left-1/2 -translate-x-1/2 left-[100%] bottom-[10%]';
     if (player.id === 1) return 'top-1/2 -translate-y-1/2 right-[0%] top-[-20%]';
-    if (player.id === 3) return 'top-1/2 -translate-y-1/2 right-[100%] top-[-20%]';
+    if (player.id === 3) return 'top-1/2 -translate-y-1/2 right-[80%] top-[-20%]';
     return '';
   }
 
   const getStatusText = () => {
     if (isActive) {
-      return <span className="font-bold text-yellow-300">Acting...</span>;
+      return <span className="font-bold text-yellow-400 animate-pulse">Thinking...</span>;
     }
     if (player.isFolded) {
-      return 'Folded';
+      return <span className="text-gray-500">Folded</span>;
     }
     let status = player.lastAction || '';
     if (player.isAllIn) {
-      const allInText = 'All In';
+      const allInText = 'ALL IN';
       return status ? `${status} (${allInText})` : allInText;
     }
     if (status) {
-      return status;
+      return <span className="text-cyan-300">{status}</span>;
     }
     return 'Waiting';
   };
 
   const avatarIcons: { [key: string]: string } = {
       'Viper': '🐍',
-      'Goliath': '🦍',
-      'The Shark': '🦈',
+      'Mountain': '🏔️',
+      'Shark': '🦈',
   };
 
   const playerIcon = player.isHuman ? '👑' : (avatarIcons[player.name] || player.name.charAt(0));
@@ -66,7 +64,7 @@ export const Player: React.FC<PlayerProps> = ({ player, isActive, isDealer, isSm
     <motion.div
         className="relative flex flex-col items-center"
         animate={{
-            opacity: player.isFolded ? 0.45 : 1,
+            opacity: player.isFolded ? 0.4 : 1,
             scale: isActive ? 1.02 : 1,
             filter: player.isFolded ? 'grayscale(80%) blur(0.6px)' : 'grayscale(0%) blur(0px)'
         }}
@@ -90,24 +88,29 @@ export const Player: React.FC<PlayerProps> = ({ player, isActive, isDealer, isSm
         </div>
         <div className="flex flex-col items-center gap-2">
             <motion.div
-                className={`player-pod relative text-white ${isActive ? 'active-ring' : ''}`}
+                className={`player-pod relative text-white ${isActive ? 'active-ring' : 'border-gray-700'}`}
                 initial={{ y: 6 }}
                 animate={{ y: 0 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
-                 <div className={`absolute -top-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold border-2 border-slate-700`} style={{ backgroundColor: player.isHuman ? '#f59e0b' : undefined }}>
-                    <span>{playerIcon}</span>
+                 {/* Improved Avatar Circle */}
+                 <div className={`absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold border-4 border-gray-800 shadow-lg z-20`} 
+                     style={{ backgroundColor: player.isHuman ? '#d97706' : '#374151' }}>
+                    <span className="drop-shadow-md">{playerIcon}</span>
                 </div>
-                <div className="pt-6 text-center">
-                    <p className="font-semibold truncate text-sm md:text-base">{player.name}</p>
-                    <div className="text-xs uppercase font-medium mt-1 text-cyan-300 h-4">
+                
+                <div className="pt-7 pb-2 px-4 text-center min-w-[100px]">
+                    <p className="font-bold text-sm tracking-wide text-gray-100 shadow-black drop-shadow-sm">{player.name}</p>
+                    <div className="text-xs uppercase font-semibold mt-1 h-4 flex items-center justify-center">
                         {getStatusText()}
                     </div>
                  </div>
-                 <div className="absolute top-[-12px] left-[-12px] flex space-x-2 z-30">
-                    {isDealer && <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 border-yellow-300/80 bg-yellow-500/90 text-black text-sm">D</div>}
-                    {isSmallBlind && <div className="w-7 h-7 rounded-full flex items-center justify-center font-bold border-2 border-white/40 bg-blue-500/90 text-white text-xs">SB</div>}
-                    {isBigBlind && <div className="w-7 h-7 rounded-full flex items-center justify-center font-bold border-2 border-white/40 bg-purple-600/90 text-white text-xs">BB</div>}
+
+                 {/* Updated Buttons (D, SB, BB) */}
+                 <div className="absolute top-[-10px] left-[-10px] flex space-x-1 z-30">
+                    {isDealer && <div className="w-6 h-6 rounded-full flex items-center justify-center font-bold bg-white text-black text-[10px] border border-gray-400 shadow-sm">D</div>}
+                    {(isSmallBlind && !isDealer) && <div className="w-6 h-6 rounded-full flex items-center justify-center font-bold bg-blue-500 text-white text-[10px] border border-blue-300 shadow-sm">SB</div>}
+                    {(isBigBlind && !isDealer) && <div className="w-6 h-6 rounded-full flex items-center justify-center font-bold bg-purple-600 text-white text-[10px] border border-purple-300 shadow-sm">BB</div>}
                 </div>
             </motion.div>
             <div className={`absolute z-20 ${getStackPositionClass()}`}>
@@ -129,7 +132,7 @@ export const Player: React.FC<PlayerProps> = ({ player, isActive, isDealer, isSm
         <motion.div
           className={`absolute left-1/2 -translate-x-1/2 flex justify-center ${cardSpacing} w-full md:w-auto`}
           style={{
-              bottom: player.isHuman ? '50%' : 'auto',  // Reduced from 100% to shove cards down, strangling overlap
+              bottom: player.isHuman ? '40%' : 'auto',  
               top: !player.isHuman ? 'calc(100% + 0.5rem)' : 'auto'
           }}
           initial="hidden"
