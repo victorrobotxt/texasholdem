@@ -5,19 +5,25 @@ interface CardProps {
   small?: boolean;
 }
 
-const SUIT_STYLES: { [key: string]: { color: string; symbol: string; shadow: string } } = {
-  H: { color: 'text-red-500', symbol: '♥', shadow: 'drop-shadow(0 2px 8px rgba(239,68,68,0.18))' },
-  D: { color: 'text-red-500', symbol: '♦', shadow: 'drop-shadow(0 2px 6px rgba(239,68,68,0.12))' },
-  S: { color: 'text-gray-900', symbol: '♠', shadow: 'drop-shadow(0 2px 6px rgba(0,0,0,0.18))' },
-  C: { color: 'text-gray-900', symbol: '♣', shadow: 'drop-shadow(0 2px 6px rgba(0,0,0,0.18))' },
+const SUIT_STYLES: { [key: string]: { color: string; symbol: string } } = {
+  H: { color: 'text-red-600', symbol: '♥' },
+  D: { color: 'text-red-600', symbol: '♦' },
+  S: { color: 'text-gray-900', symbol: '♠' },
+  C: { color: 'text-gray-900', symbol: '♣' },
 };
 
 export const Card: React.FC<CardProps> = ({ card, small = false }) => {
   if (card === 'BACK') {
-    const sizeClasses = small ? 'w-12 h-16' : 'w-20 h-28';
+    const sizeClasses = small ? 'w-10 h-14' : 'w-16 h-24 sm:w-20 sm:h-28';
     return (
-      <div className={`${sizeClasses} card card-small flex items-center justify-center`} style={{ background: 'linear-gradient(180deg,#0b2b2a,#0b2b2a)', borderRadius: small ? 8 : 10 }}>
-          <div style={{ width: '70%', height: '70%', borderRadius: 6, border: '2px solid rgba(255,255,255,0.06)', background: 'linear-gradient(180deg,#082927,#063b3a)' }} />
+      <div 
+        className={`${sizeClasses} relative rounded-md shadow-xl border-2 border-white bg-blue-900`}
+        style={{
+            backgroundImage: `repeating-linear-gradient(45deg, #1e3a8a 0, #1e3a8a 2px, #172554 2px, #172554 4px)`,
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
+        }}
+      >
+        <div className="absolute inset-1 border border-blue-400/30 rounded-sm"></div>
       </div>
     );
   }
@@ -28,30 +34,29 @@ export const Card: React.FC<CardProps> = ({ card, small = false }) => {
 
   if (small) {
     return (
-      <div className={`w-12 h-16 card card-small p-1 flex flex-col justify-between relative`} >
-        <div style={{ color: styles.color === 'text-red-500' ? '#dc2626' : '#111827', fontWeight: 700 }}>
-          <div className="absolute top-1 left-1 text-sm">{rank}</div>
-          <div className="absolute top-5 left-1 text-xs">{styles.symbol}</div>
-        </div>
-        <div className={`self-end font-bold text-2xl`} style={{ color: styles.color === 'text-red-500' ? '#dc2626' : '#111827', filter: styles.shadow }}>
-          {styles.symbol}
-        </div>
+      <div className="w-10 h-14 bg-white rounded-md shadow-md flex flex-col items-center justify-center border border-gray-200">
+        <span className={`text-sm font-bold ${styles.color}`}>{rank}</span>
+        <span className={`text-base leading-none ${styles.color}`}>{styles.symbol}</span>
       </div>
     );
   }
 
   return (
-    <div className={`w-16 h-24 sm:w-20 sm:h-28 card p-2 flex flex-col justify-between relative`}>
-      <div style={{ color: styles.color === 'text-red-500' ? '#dc2626' : '#111827', fontWeight: 800 }}>
-        <div className="absolute top-2 left-3 text-lg sm:text-xl">{rank}</div>
-        <div className="absolute top-8 left-3 text-lg sm:text-xl">{styles.symbol}</div>
+    <div className="w-16 h-24 sm:w-20 sm:h-28 bg-white rounded-lg shadow-2xl flex flex-col justify-between p-1.5 relative overflow-hidden transition-transform hover:-translate-y-1 border border-gray-200">
+      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/60 to-transparent pointer-events-none" />
+
+      <div className={`flex flex-col items-center leading-none ${styles.color}`}>
+        <span className="font-bold text-lg">{rank}</span>
+        <span className="text-sm">{styles.symbol}</span>
       </div>
-      <div className={`self-center font-extrabold text-4xl sm:text-5xl`} style={{ color: styles.color === 'text-red-500' ? '#dc2626' : '#111827' }}>
+
+      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl sm:text-5xl ${styles.color} opacity-90`}>
         {styles.symbol}
       </div>
-      <div style={{ color: styles.color === 'text-red-500' ? '#dc2626' : '#111827', fontWeight: 800 }}>
-        <div className="absolute bottom-2 right-3 transform rotate-180 text-lg sm:text-xl">{rank}</div>
-        <div className="absolute bottom-8 right-3 transform rotate-180 text-lg sm:text-xl">{styles.symbol}</div>
+
+      <div className={`flex flex-col items-center leading-none transform rotate-180 ${styles.color}`}>
+        <span className="font-bold text-lg">{rank}</span>
+        <span className="text-sm">{styles.symbol}</span>
       </div>
     </div>
   );

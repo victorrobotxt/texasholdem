@@ -2,7 +2,6 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// this is a backend-only key
 export default defineConfig({
       server: {
         port: 3000,

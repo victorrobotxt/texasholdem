@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./texas-holdem-backend
+    ports:
+      - "5001:5001"
+    env_file:
+      - ./texas-holdem-backend/.env
+
+  frontend:
+    build: ./texas-holdem-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

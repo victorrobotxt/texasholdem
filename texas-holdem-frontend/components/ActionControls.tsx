@@ -18,7 +18,7 @@ export const ActionControls: React.FC<ActionControlsProps> = ({ player, pot, onA
     const canCheck = callAmount <= 0;
 
     const quickBets = useMemo(() => [
-        { label: '1/2 Pot', value: Math.max(minRaise, Math.floor((pot + currentBet) / 2)) },
+        { label: '½ Pot', value: Math.max(minRaise, Math.floor((pot + currentBet) / 2)) },
         { label: 'Pot', value: Math.max(minRaise, pot + currentBet) },
         { label: 'All In', value: player.chips + player.currentBet },
     ], [pot, player, minRaise, currentBet]);
@@ -28,7 +28,7 @@ export const ActionControls: React.FC<ActionControlsProps> = ({ player, pot, onA
     }, [minRaise]);
     
     const handleActionWithVibration = (actionFn: () => void) => {
-        navigator.vibrate?.(50);
+        if (navigator.vibrate) navigator.vibrate(50);
         actionFn();
     };
 
@@ -37,29 +37,26 @@ export const ActionControls: React.FC<ActionControlsProps> = ({ player, pot, onA
     };
     
     const handleFold = () => handleActionWithVibration(() => onAction('fold'));
-    const handleCheckOrCall = () => handleActionWithVibration(() => onAction(canCheck ? 'check' : 'call'));
+    const handleCheckOrCall = () => handleActionWithVibration(() => onAction(canCheck ? 'check' : 'call', callAmount));
     const handleBetOrRaise = () => {
-        // Use the sanitized amount (minRaise <= amount <= stack)
         const finalAmount = Math.max(minRaise, Math.min(betAmount, player.chips + player.currentBet));
-        
-        // Determine action: raise if calling is required AND player has chips remaining, otherwise bet.
         const actionType = (currentBet > 0 && callAmount < player.chips) ? 'raise' : 'bet';
-        
         handleActionWithVibration(() => onAction(actionType, finalAmount));
     };
-  
+   
     const sanitizedBetAmount = Math.min(betAmount, player.chips + player.currentBet);
 
     return (
         <fieldset 
             disabled={!isActive} 
-            className="w-full max-w-4xl transition-opacity duration-300 disabled:opacity-50"
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-50 transition-all duration-300 disabled:opacity-50 disabled:translate-y-4 disabled:pointer-events-none"
         >
-          <div className="flex flex-col items-center justify-center space-y-3 p-3 bg-gradient-to-b from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-yellow-600/30">
-            <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
+          <div className="bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-4 ring-1 ring-black/50">
+            
+            <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden mb-4">
                 <AnimatePresence>
                     {isActive && (
-                        <motion.div className="h-full bg-gradient-to-r from-yellow-500 to-red-500 origin-left"
+                        <motion.div className="h-full bg-gradient-to-r from-amber-400 to-red-500 origin-left"
                             key={`timer-${player.id}`}
                             initial={{ scaleX: 1 }}
                             animate={{ scaleX: 0 }}
@@ -69,48 +66,47 @@ export const ActionControls: React.FC<ActionControlsProps> = ({ player, pot, onA
                 </AnimatePresence>
             </div>
     
-            <div className="flex flex-wrap items-stretch justify-center gap-3 w-full p-2">
+            <div className="flex items-stretch justify-between gap-3 mb-4">
                 
-                {/* 1. FOLD BUTTON */}
                 <button onClick={handleFold} 
-                    className="flex-grow sm:flex-grow-0 px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-sm transition-all active:scale-95 shadow-lg
-                    bg-gradient-to-b from-gray-700 to-gray-900 text-red-500 border-t border-gray-600 border-b-4 border-black hover:brightness-110">
+                    className="flex-1 py-3 rounded-xl font-bold uppercase tracking-wider text-sm shadow-lg
+                    bg-gradient-to-b from-gray-700 to-gray-800 text-red-400 border border-white/5 hover:brightness-110 active:scale-95 transition-all">
                     Fold
                 </button>
                 
-                {/* 2. CHECK / CALL BUTTON */}
                 <button onClick={handleCheckOrCall} 
-                    className={`flex-grow sm:flex-grow-0 px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-sm transition-all active:scale-95 shadow-lg text-white border-t border-blue-400 border-b-4 border-blue-900 hover:brightness-110
-                    ${canCheck 
-                        ? 'bg-gradient-to-b from-blue-500 to-blue-700' 
-                        : 'bg-gradient-to-b from-blue-600 to-blue-800'}`}>
+                    className="flex-1 py-3 rounded-xl font-bold uppercase tracking-wider text-sm shadow-lg
+                    bg-gradient-to-b from-blue-600 to-blue-700 text-white border-t border-blue-400 hover:brightness-110 active:scale-95 transition-all">
                     {canCheck ? 'Check' : `Call $${callAmount}`}
                 </button>
                 
-                {/* 3. BET / RAISE BUTTON */}
                 <button onClick={handleBetOrRaise} disabled={sanitizedBetAmount < minRaise} 
-                    className="flex-grow sm:flex-grow-0 px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-sm transition-all active:scale-95 shadow-lg
-                    bg-gradient-to-b from-amber-400 to-amber-600 text-black border-t border-amber-300 border-b-4 border-amber-800 hover:brightness-110 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed">
+                    className="flex-1 py-3 rounded-xl font-bold uppercase tracking-wider text-sm shadow-lg
+                    bg-gradient-to-b from-amber-400 to-amber-600 text-black border-t border-amber-300 hover:brightness-110 active:scale-95 transition-all">
                     {currentBet > 0 ? `Raise $${sanitizedBetAmount}` : `Bet $${sanitizedBetAmount}`}
                 </button>
             </div>
     
-            <div className="w-full flex flex-col items-center space-y-2 pt-1">
+            <div className="flex items-center gap-4 bg-black/20 p-2 rounded-lg">
+                <div className="flex gap-2">
+                    {quickBets.map(({label, value}) => (
+                        <button key={label} onClick={() => setBetAmount(value)} 
+                            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-xs font-bold rounded-md text-gray-200 transition-colors">
+                            {label}
+                        </button>
+                    ))}
+                </div>
+                
                 <input type="range" 
                     min={minRaise} 
                     max={player.chips + player.currentBet} 
                     step="10" 
                     value={betAmount} 
                     onChange={handleBetChange} 
-                    className="w-full max-w-md accent-yellow-500 disabled:cursor-not-allowed" />
+                    className="flex-grow accent-amber-500 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer" />
                 
-                <div className="flex items-center justify-center space-x-3">
-                    {quickBets.map(({label, value}) => (
-                        <button key={label} onClick={() => setBetAmount(value)} 
-                            className="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-full shadow-md transition-all hover:scale-105 border border-amber-900 disabled:cursor-not-allowed disabled:hover:scale-100">
-                            {label}
-                        </button>
-                    ))}
+                <div className="w-16 text-right font-mono font-bold text-amber-400">
+                    ${sanitizedBetAmount}
                 </div>
             </div>
           </div>

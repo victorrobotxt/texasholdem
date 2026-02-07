@@ -6,7 +6,7 @@ export interface Player {
   currentBet: number;
   isFolded: boolean;
   isHuman: boolean;
-  isAllIn: boolean; // Also adding isAllIn from the backend
+  isAllIn: boolean;
   lastAction?: string | null;
 }
 

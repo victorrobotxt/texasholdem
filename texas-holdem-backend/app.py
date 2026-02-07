@@ -1,5 +1,9 @@
+import eventlet
+eventlet.monkey_patch()
+
 import time
 import threading
+import logging
 from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit, join_room
 from flask_cors import CORS
@@ -8,46 +12,58 @@ from game.engine import GameEngine
 from game.player import Player
 from ai.gemini_player import get_ai_decision
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger('poker')
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'poker_secret'
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
 
-# In-memory storage
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet') 
+
 games: dict[str, GameEngine] = {}
 
 def run_ai_cycle(game_id: str) -> None:
-    """Background task to handle consecutive AI turns."""
+    game = games.get(game_id)
+    if not game:
+        return
+    
     while True:
-        game = games.get(game_id)
-        if not game or game.stage == "HAND_OVER":
-            break
+        with game.lock:
+            if game.stage == "HAND_OVER":
+                logger.info(f"[{game_id[:8]}] AI cycle ended - hand over")
+                break
 
-        current_id = game.active_player_id
-        if current_id == -1:
-            break
+            current_id = game.active_player_id
+            if current_id == -1:
+                break
 
-        current_player = game.players[current_id]
-        if current_player.is_human:
-            break
+            current_player = game.players[current_id]
+            if current_player.is_human:
+                logger.debug(f"[{game_id[:8]}] Waiting for human player")
+                break
 
-        # Artificial delay for realism
-        time.sleep(1.0)
+            state = game.to_dict(for_player_id=current_id)
 
-        # Serialize state for AI
-        state = game.to_dict(for_player_id=current_id)
-
-        # Get Move
+        time.sleep(1.0)  
+        
         move = get_ai_decision(state, current_id)
+        logger.info(f"[{game_id[:8]}] AI {current_player.name}: {move['action']} {move.get('amount', '')}")
 
-        try:
-            game.process_player_action(
-                current_id, move['action'], move.get('amount', 0)
-            )
-            socketio.emit('update', game.to_dict(for_player_id=0), to=game_id)
-        except Exception as e: # pylint: disable=broad-except
-            print(f"Err processing AI {current_id}: {e}")
-            game.process_player_action(current_id, "fold")
+        with game.lock:
+            try:
+                game.process_player_action(
+                    current_id, move['action'], move.get('amount', 0)
+                )
+                socketio.emit('update', game.to_dict(for_player_id=0), to=game_id)
+            except Exception as e:
+                logger.error(f"[{game_id[:8]}] Error processing AI {current_id}: {e}")
+                game.process_player_action(current_id, "fold")
+                socketio.emit('update', game.to_dict(for_player_id=0), to=game_id)
 
 @app.route('/api/game', methods=['POST'])
 def create_game():
@@ -64,9 +80,8 @@ def create_game():
     engine = GameEngine([human] + bots)
     games[engine.id] = engine
 
-    # If Human is not first (e.g., BB is pos 2, UTG is 3), trigger AI
     if engine.active_player_id != 0:
-        threading.Thread(target=run_ai_cycle, args=(engine.id,)).start()
+        socketio.start_background_task(run_ai_cycle, engine.id)
 
     return jsonify(engine.to_dict(for_player_id=0))
 
@@ -79,11 +94,9 @@ def next_hand(game_id):
     game.start_new_hand()
 
     if game.active_player_id != 0:
-        threading.Thread(target=run_ai_cycle, args=(game.id,)).start()
+        socketio.start_background_task(run_ai_cycle, game.id)
 
     return jsonify(game.to_dict(for_player_id=0))
-
-# --- Socket Events ---
 
 @socketio.on('join')
 def on_join(data):
@@ -103,12 +116,11 @@ def on_action(data):
         game.process_player_action(0, data['action'], data.get('amount', 0))
         emit('update', game.to_dict(for_player_id=0), to=game_id)
 
-        # Trigger AI chain
         if game.active_player_id != 0:
-            threading.Thread(target=run_ai_cycle, args=(game_id,)).start()
+            socketio.start_background_task(run_ai_cycle, game_id)
 
     except ValueError as e:
         emit('error', {'message': str(e)})
 
 if __name__ == '__main__':
-    socketio.run(app, port=5001, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5001, debug=True)

@@ -1,4 +1,5 @@
 import uuid
+import threading
 from typing import List, Dict, Any
 from .card import Card
 from .deck import Deck
@@ -8,6 +9,7 @@ from .hand_evaluator import evaluate_hand
 class GameEngine:
     def __init__(self, players: List[Player]):
         self.id = str(uuid.uuid4())
+        self.lock = threading.RLock()  # Thread-safe access to game state
         self.players = players
         self.deck = Deck()
         self.community_cards: List[Card] = []
@@ -191,7 +193,6 @@ class GameEngine:
 
         self.winners = [p.id for p in winners]
 
-        # Split pot
         if winners:
             share = self.pot // len(winners)
             for p in winners:
