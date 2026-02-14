@@ -9,7 +9,7 @@ from .hand_evaluator import evaluate_hand
 class GameEngine:
     def __init__(self, players: List[Player]):
         self.id = str(uuid.uuid4())
-        self.lock = threading.RLock()  # Thread-safe access to game state
+        self.lock = threading.RLock()
         self.players = players
         self.deck = Deck()
         self.community_cards: List[Card] = []
@@ -92,43 +92,44 @@ class GameEngine:
         self._rotate_turn()
 
     def _rotate_turn(self) -> None:
-        active_players = [p for p in self.players if not p.is_folded and p.chips > 0]
+        active_players = [p for p in self.players if not p.is_folded and not p.is_all_in]
 
         if len([p for p in self.players if not p.is_folded]) == 1:
             self._end_hand_prematurely()
             return
 
-        all_matched = all(
-            p.current_bet == self.bet_to_call or p.is_all_in for p in active_players
-        )
-
-        current_idx = self.active_player_id
-
+        next_idx = self.active_player_id
         for i in range(1, len(self.players)):
-            idx = (current_idx + i) % len(self.players)
+            idx = (self.active_player_id + i) % len(self.players)
             p = self.players[idx]
-
-            if p.is_folded or p.is_all_in:
-                continue
-
-            if p.current_bet < self.bet_to_call:
-                self.active_player_id = idx
-                return
-
-        if all_matched and self.active_player_id != -1:
+            if not p.is_folded and not p.is_all_in:
+                next_idx = idx
+                break
+        
+        all_matched = all(
+            p.current_bet == self.bet_to_call or p.is_all_in 
+            for p in active_players
+        )
+        
+        all_acted = all(p.last_action is not None for p in active_players)
+        
+        round_over = False
+        if all_matched and all_acted:
+            is_preflop = (self.stage == "PRE_FLOP")
             bb_pos = (self.dealer_pos + 2) % len(self.players)
-            curr_player = self.players[self.active_player_id]
+            bb_player = self.players[bb_pos]
+            
+            if is_preflop and self.bet_to_call == 20 and bb_player.last_action == "Blind":
+                if next_idx != bb_pos:
+                    pass
+                round_over = False
+            else:
+                round_over = True
 
-            is_preflop = self.stage == "PRE_FLOP"
-            is_bb = self.active_player_id == bb_pos
-            no_raises = self.bet_to_call == 20
-            blind_act = curr_player.last_action == "Blind"
-
-            if is_preflop and is_bb and no_raises and blind_act:
-                return
-
+        if round_over:
             self._advance_stage()
-            return
+        else:
+            self.active_player_id = next_idx
 
     def _advance_stage(self) -> None:
         for p in self.players:

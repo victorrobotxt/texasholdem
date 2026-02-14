@@ -26,14 +26,6 @@ PERSONALITIES = {
     "default": "You are an Action Player. You prioritize fun and aggressive play over safety. Do not fold too easily."
 }
 
-def _get_position_name(player_id: int, dealer_id: int, num_players: int) -> str:
-    relative_pos = (player_id - dealer_id) % num_players
-    if relative_pos == 1: return "Small Blind (early)"
-    elif relative_pos == 2: return "Big Blind (early)"
-    elif relative_pos == 3: return "Under the Gun (early)"
-    elif relative_pos >= num_players - 1: return "Button (late)"
-    else: return "Middle position"
-
 def _calculate_pot_odds(pot: int, to_call: int) -> str:
     if to_call <= 0: return "N/A"
     total_pot = pot + to_call

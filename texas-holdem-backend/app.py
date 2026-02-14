@@ -2,7 +2,6 @@ import eventlet
 eventlet.monkey_patch()
 
 import time
-import threading
 import logging
 from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit, join_room

@@ -28,7 +28,7 @@ def evaluate_hand(cards: List[Card]) -> Tuple[int, List[int]]:
                 return window
         
         if {14, 2, 3, 4, 5}.issubset(set(unique_ranks)):
-            return [5, 4, 3, 2, 14] # 5-high straight
+            return [5, 4, 3, 2, 14]
             
         return None
 
