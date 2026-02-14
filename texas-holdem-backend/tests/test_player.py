@@ -5,7 +5,6 @@ class TestPlayer(unittest.TestCase):
 
     def setUp(self):
         """Set up a player for each test."""
-        # Use 'id' keyword arg
         self.player = Player(id=1, name="TestBot", chips=1000)
 
     def test_player_initialization(self):
@@ -22,8 +21,6 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(self.player.chips, 900)
         self.assertEqual(self.player.current_bet, 100)
         
-        # Test placing another bet (cumulative logic handled by caller/player state)
-        # The method .bet(amount) reduces chips by 'amount' and adds to current_bet
         self.player.bet(50)
         self.assertEqual(self.player.chips, 850)
         self.assertEqual(self.player.current_bet, 150)
@@ -37,8 +34,6 @@ class TestPlayer(unittest.TestCase):
 
     def test_place_bet_insufficient_funds(self):
         """Test logic for betting more than chips (should cap at stack)."""
-        # The new implementation .bet() clamps the value, doesn't raise Error
-        # but simply bets everything they have.
         added = self.player.bet(1001)
         
         self.assertEqual(added, 1000) # Should only take what they have
@@ -57,7 +52,6 @@ class TestPlayer(unittest.TestCase):
         self.player.fold()
         self.player.hand.append("dummy_card")
         
-        # New method name is reset_hand_state
         self.player.reset_hand_state()
         
         self.assertEqual(self.player.hand, [])

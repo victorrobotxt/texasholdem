@@ -4,7 +4,6 @@ from game.player import Player
 
 @pytest.fixture
 def players():
-    # Uses 'id' instead of 'player_id'
     return [
         Player(id=0, name="p0", chips=1000, is_human=True),
         Player(id=1, name="p1", chips=1000),
@@ -19,12 +18,6 @@ def test_start_new_hand(players):
     assert engine.pot == 30  # 10 SB + 20 BB
     assert engine.bet_to_call == 20
     
-    # Dealer Logic Correction:
-    # Engine initialized dealer_pos=0.
-    # start_new_hand increments immediately -> Dealer=1.
-    # SB = (1+1)%4 = 2.
-    # BB = (1+2)%4 = 3.
-    # UTG = (3+1)%4 = 0.
 
     assert engine.dealer_pos == 1
 
@@ -37,24 +30,20 @@ def test_start_new_hand(players):
     assert bb_player.chips == 980
     assert bb_player.current_bet == 20
 
-    # Player 0 (UTG) is first to act
     assert engine.active_player_id == 0
 
 def test_player_action_fold(players):
     engine = GameEngine(players)
     
-    # Player 0 is UTG. Fold.
     player_id = 0
     engine.process_player_action(player_id, "fold")
     
     assert engine.players[player_id].is_folded
-    # Action moves to next player: 1 (Dealer)
     assert engine.active_player_id == 1
 
 def test_player_action_call(players):
     engine = GameEngine(players)
     
-    # Player 0 is UTG. Call 20.
     player_id = 0
     engine.process_player_action(player_id, "call")
 
@@ -67,7 +56,6 @@ def test_player_action_call(players):
 def test_player_action_raise(players):
     engine = GameEngine(players)
     
-    # Player 0 (UTG) raises TO 60
     player_id = 0
     amount = 60
     engine.process_player_action(player_id, "raise", amount)

@@ -4,7 +4,6 @@ from .card import Card, Rank, Suit
 
 class Deck:
     def __init__(self) -> None:
-        # List comprehension to build deck (Pythonic)
         self._cards: List[Card] = [
             Card(rank, suit) 
             for suit in Suit 
@@ -20,7 +19,6 @@ class Deck:
         if len(self._cards) < amount:
             raise ValueError("Not enough cards in deck")
         
-        # Slicing strategy to remove and return
         dealt = self._cards[:amount]
         del self._cards[:amount]
         return dealt

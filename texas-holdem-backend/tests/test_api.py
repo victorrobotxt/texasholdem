@@ -8,12 +8,9 @@ def client():
     with app.test_client() as client:
         yield client
 
-# Correct mock path to where get_ai_decision is imported in app.py
-# or where it is defined. Based on app.py imports: 'ai.gemini_player.get_ai_decision'
 @patch('ai.gemini_player.get_ai_decision')
 def test_create_game_api(mock_get_ai, client):
     """Test game creation endpoint."""
-    # Mock return must look like an AI decision
     mock_get_ai.return_value = {"action": "fold", "amount": 0}
     
     response = client.post('/api/game', json={"playerName": "Test Player"})

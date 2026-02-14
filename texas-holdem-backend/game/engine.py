@@ -15,7 +15,6 @@ class GameEngine:
         self.community_cards: List[Card] = []
         self.pot = 0
 
-        # Game State Pointers
         self.dealer_pos = 0
         self.active_player_id = 0
         self.bet_to_call = 0
@@ -31,10 +30,8 @@ class GameEngine:
         self.winners = []
         self.stage = "PRE_FLOP"
 
-        # Rotate Dealer
         self.dealer_pos = (self.dealer_pos + 1) % len(self.players)
 
-        # Reset players
         active_count = 0
         for p in self.players:
             p.reset_hand_state()
@@ -45,10 +42,8 @@ class GameEngine:
                 p.is_folded = True
 
         if active_count < 2:
-            # Game Over logic usually goes here
             pass
 
-        # Blinds logic
         sb_pos = (self.dealer_pos + 1) % len(self.players)
         bb_pos = (self.dealer_pos + 2) % len(self.players)
 
@@ -56,7 +51,6 @@ class GameEngine:
         self._post_blind(bb_pos, 20)
         self.bet_to_call = 20
 
-        # Set action to UTG (Under the Gun)
         self.active_player_id = (bb_pos + 1) % len(self.players)
 
     def _post_blind(self, player_idx: int, amount: int) -> None:
@@ -85,7 +79,6 @@ class GameEngine:
                 player.last_action = "Check"
 
         elif action in ["bet", "raise"]:
-            # Logic: Input 'amount' is the TARGET TOTAL bet (e.g., Raise TO 50)
             diff = amount - player.current_bet
             added = player.bet(diff)
             self.pot += added
@@ -99,22 +92,18 @@ class GameEngine:
         self._rotate_turn()
 
     def _rotate_turn(self) -> None:
-        # Check if round is complete
         active_players = [p for p in self.players if not p.is_folded and p.chips > 0]
 
-        # 1. Everyone folded but one?
         if len([p for p in self.players if not p.is_folded]) == 1:
             self._end_hand_prematurely()
             return
 
-        # 2. Check if everyone active has matched the bet
         all_matched = all(
             p.current_bet == self.bet_to_call or p.is_all_in for p in active_players
         )
 
         current_idx = self.active_player_id
 
-        # Try finding next player in current betting round
         for i in range(1, len(self.players)):
             idx = (current_idx + i) % len(self.players)
             p = self.players[idx]
@@ -122,13 +111,11 @@ class GameEngine:
             if p.is_folded or p.is_all_in:
                 continue
 
-            # If they haven't matched the bet, it's definitely their turn
             if p.current_bet < self.bet_to_call:
                 self.active_player_id = idx
                 return
 
         if all_matched and self.active_player_id != -1:
-            # Check if BIG BLIND has option in Pre-Flop
             bb_pos = (self.dealer_pos + 2) % len(self.players)
             curr_player = self.players[self.active_player_id]
 
@@ -161,7 +148,6 @@ class GameEngine:
             self._resolve_showdown()
             return
 
-        # Set active player to first after dealer
         idx = self.dealer_pos
         for i in range(1, len(self.players) + 1):
             next_idx = (idx + i) % len(self.players)
@@ -170,7 +156,6 @@ class GameEngine:
                 self.active_player_id = next_idx
                 return
 
-        # If everyone is all-in, just run to river
         if self.stage != "HAND_OVER":
             self._advance_stage()
 

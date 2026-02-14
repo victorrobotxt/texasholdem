@@ -28,7 +28,6 @@ class TestHandEvaluator(unittest.TestCase):
         cards = self._create_cards_from_strings(['AC', 'AD', 'AS', 'AH', 'KH', 'QD', 'JC'])
         rank, kickers = evaluate_hand(cards)
         self.assertEqual(rank, 8) # 8 = Four of a Kind
-        # Kicker logic: [QuadRank, KickerRank] -> [14, 13]
         self.assertEqual(kickers[1], 13) 
 
     def test_full_house(self):

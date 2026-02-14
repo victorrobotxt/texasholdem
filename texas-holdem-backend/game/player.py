@@ -5,7 +5,7 @@ from .card import Card
 @dataclass
 class Player:
     id: int
-    name: str  # FIXED: 'string' is a module, 'str' is the type
+    name: str
     chips: int
     is_human: bool = False
     hand: List[Card] = field(default_factory=list)
