@@ -37,7 +37,6 @@ def test_poker_game():
 
         if data['activePlayerId'] == 0:
             print("\n🟢 IT IS YOUR TURN!")
-            # Simple logic: Call if possible
             to_call = data['betToCall'] - next(p['currentBet'] for p in data['players'] if p['id'] == 0)
             if to_call > 0:
                 print(f"Action: Calling ${to_call}...")
